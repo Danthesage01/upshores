@@ -30,11 +30,14 @@
 ### 🔹 Company Dashboard
 
 - **Search & Filter Talents** by skills, location, and experience
+- **Pagination** 
 - **Update company profile details (image)**
 
 ### 🔹 Admin Dashboard
 
 - **Upload Talents from Excel**
+- **Search & Filter Talents** by skills, location, and experience
+- **Pagination** 
 - **Manage Users & Companies**
 
 ## 🛠️ Tech Stack
