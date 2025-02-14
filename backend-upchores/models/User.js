@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["YES", "NO"],
       default: "NO",
     },
+    image: { type: String },
   },
   { timestamps: true }
 );

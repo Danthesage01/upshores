@@ -3,6 +3,7 @@ import {
   upload,
   uploadTalentsFromExcel,
   getTalents,
+  deleteAllTalents,
 } from "../controllers/talentController.js";
 import authorizationMiddleware from "../middleware/authorization.js";
 
@@ -14,6 +15,7 @@ router.post(
   upload.single("file"),
   uploadTalentsFromExcel
 );
+router.delete("/", authorizationMiddleware(["super_admin"]), deleteAllTalents);
 router.get("/", getTalents);
 
 export default router;

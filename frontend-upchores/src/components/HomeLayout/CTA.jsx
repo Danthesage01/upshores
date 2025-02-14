@@ -3,7 +3,7 @@ import React from "react";
 function CTA() {
   return (
     <section
-      id="cta"
+      id="pricing"
       className="py-20 bg-blue-600"
     >
       <div className="container mx-auto px-4 text-center">

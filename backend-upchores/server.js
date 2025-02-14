@@ -7,6 +7,7 @@ import dotenv from "dotenv/config";
 import connectDB from "./db/connect.js";
 import authRouter from "./routes/authRoutes.js";
 import talentRouter from "./routes/talentRoutes.js";
+import userProfileRouter from "./routes/userProfileRoutes.js";
 import notFoundMiddleware from "./middleware/notFound.js";
 import errorHandlingMiddleware from "./middleware/errorHandling.js";
 import cors from "cors";
@@ -52,6 +53,7 @@ const createApp = () => {
 
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/talents", authenticationMiddleware, talentRouter);
+  app.use("/api/v1/users", authenticationMiddleware, userProfileRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorHandlingMiddleware);

@@ -11,6 +11,16 @@ const uploadTalentsFromExcel = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
+    const allowedMimeTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "application/vnd.ms-excel", // .xls
+    ];
+
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res
+        .status(400)
+        .json({ message: "Only Excel files (.xlsx, .xls) are allowed" });
+    }
     // Parse Excel file
     const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -18,8 +28,10 @@ const uploadTalentsFromExcel = async (req, res) => {
 
     const talents = jsonData.map((entry) => ({
       name: entry.name,
+      image: entry.image,
       email: entry.email,
       phone: entry.phone || "",
+      role: entry.role || "",
       location: entry.location || "",
       skills: entry.skills ? entry.skills.split(",").map((s) => s.trim()) : [],
       monthlyRate: entry.monthlyRate || "",
@@ -79,4 +91,13 @@ const getTalents = async (req, res) => {
   }
 };
 
-export { upload, uploadTalentsFromExcel, getTalents };
+const deleteAllTalents = async (req, res) => {
+  try {
+    await Talent.deleteMany({});
+    res.status(200).json({ message: "All talents removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { upload, uploadTalentsFromExcel, getTalents, deleteAllTalents };

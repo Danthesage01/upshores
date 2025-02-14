@@ -100,6 +100,7 @@ const login = async (req, res) => {
     data: {
       companyName: user.companyName,
       companySize: user.companySize,
+      email: user.email,
       userId: user._id,
       role: user.role,
       createdAt: user.createdAt,

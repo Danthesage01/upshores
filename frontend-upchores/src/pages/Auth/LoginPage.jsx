@@ -1,16 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../../components/Global/InputField"; // Import the reusable input field
-import CheckboxInput from "../../components/Global/Checkbox";
-import SelectField from "../../components/Global/SelectField";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useLoginUserMutation } from "../../Services/authApi";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../features/authSlice";
+import { toast } from "react-toastify";
+import SmallLoader from "../../components/Global/SmallLoader";
 
 export const LoginPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [
+    loginUser,
+    {
+      data: loginData,
+      isLoading: isLoginLoading,
+      isSuccess: isLoginSuccess,
+      isError: isLoginError,
+      error: loginError,
+    },
+  ] = useLoginUserMutation();
   const [formData, setFormData] = useState({
-    companyName: "",
     email: "",
     password: "",
-    companySize: "",
-    agreedToTerms: false,
   });
 
   const handleChange = (e) => {
@@ -20,13 +33,50 @@ export const LoginPage = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password } = formData;
 
-  const companySizeOptions = [
-    { value: "1-10", label: "1-10 employees" },
-    { value: "11-50", label: "11-50 employees" },
-    { value: "51-200", label: "51-200 employees" },
-    { value: "201+", label: "201+ employees" },
-  ];
+    if (!password || !email) {
+      toast.error("Please provide credentials");
+      return;
+    } else {
+      const response = await loginUser({ email, password });
+      if (response.error) {
+        // console.log(response?.error?.data?.error, "new");
+        const errMessage = response?.error?.data?.message;
+
+        if (typeof errMessage === "string") {
+          return toast.error(errMessage);
+        } else if (typeof errMessage === "object") {
+          return Object.values(errMessage)
+            .flat()
+            .forEach((msg) => toast.error(msg));
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isLoginSuccess) {
+      toast.success("Login successful");
+
+      localStorage.setItem("accessToken", loginData?.data.accessToken);
+      localStorage.setItem("refreshToken", loginData?.data.refreshToken);
+
+      dispatch(
+        setUser({
+          email: loginData.data.email,
+          userId: loginData.data.userId,
+          accessToken: loginData.data.accessToken,
+          refreshToken: loginData.data.refreshToken,
+          user: loginData?.data,
+        })
+      );
+
+      navigate("/dashboard");
+    }
+  });
 
   return (
     <div
@@ -70,7 +120,10 @@ export const LoginPage = () => {
             id="registration-form"
             className="bg-white rounded-xl shadow-lg p-8"
           >
-            <form className="space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
               <div className="space-y-4">
                 <InputField
                   label="Work Email"
@@ -93,7 +146,7 @@ export const LoginPage = () => {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
               >
-                Log in
+                {isLoginLoading ? <SmallLoader /> : "Log in"}
               </button>
             </form>
             <div className="mt-6 text-center text-sm text-gray-600">

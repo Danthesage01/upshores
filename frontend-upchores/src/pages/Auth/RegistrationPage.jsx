@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../../components/Global/InputField"; // Import the reusable input field
 import CheckboxInput from "../../components/Global/Checkbox";
 import SelectField from "../../components/Global/SelectField";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { setUser } from "../../features/authSlice";
+import { useRegisterUserMutation } from "../../Services/authApi";
+import SmallLoader from "../../components/Global/SmallLoader";
 
 export const RegistrationPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     companyName: "",
     email: "",
@@ -12,6 +19,17 @@ export const RegistrationPage = () => {
     companySize: "",
     agreedToTerms: false,
   });
+
+  const [
+    registerUser,
+    {
+      data: loginData,
+      isLoading: isRegisterLoading,
+      isSuccess: isRegisterSuccess,
+      isError: isRegisterError,
+      error: registerError,
+    },
+  ] = useRegisterUserMutation();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -27,6 +45,54 @@ export const RegistrationPage = () => {
     { value: "51-200", label: "51-200 employees" },
     { value: "201+", label: "201+ employees" },
   ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password, companyName, companySize, agreedToTerms } =
+      formData;
+    if (!password || !email || !companyName || !companySize) {
+      toast.error("Please fill all fields");
+      return;
+    }
+    if (!agreedToTerms) {
+      toast.error("Agree to T&C to create an account");
+      return;
+    }
+    try {
+      const payload = {
+        email,
+        password,
+        companyName,
+        companySize,
+        acceptTermsAndConditions: agreedToTerms && "YES",
+      };
+      const response = await registerUser(payload);
+      if (response.error) {
+        const errMessage = response?.error?.data?.message;
+        if (typeof errMessage === "string") {
+          toast.error(errMessage);
+        } else if (typeof errMessage === "object") {
+          return Object.values(errMessage)
+            .flat()
+            .forEach((msg) => toast.error(msg));
+        }
+      }
+    } catch (error) {
+      console.log(error, "down here");
+    }
+  };
+
+  useEffect(() => {
+    if (isRegisterSuccess) {
+      toast.success("User created successfully");
+
+      // localStorage.setItem("token", loginData?.data.token);
+
+      console.log(loginData);
+
+      navigate("/login");
+    }
+  }, [isRegisterSuccess]);
 
   return (
     <div
@@ -67,7 +133,10 @@ export const RegistrationPage = () => {
             id="registration-form"
             className="bg-white rounded-xl shadow-lg p-8"
           >
-            <form className="space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
               <div className="space-y-4">
                 <InputField
                   label="Company Name"
@@ -100,6 +169,7 @@ export const RegistrationPage = () => {
                   onChange={handleChange}
                 />
                 <CheckboxInput
+                  name="agreedToTerms"
                   label="I agree to UpShore's Terms of Service and Privacy Policy"
                   checked={formData.agreedToTerms}
                   onChange={handleChange}
@@ -109,14 +179,14 @@ export const RegistrationPage = () => {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
               >
-                Create Account
+                {isRegisterLoading ? <SmallLoader /> : "Create Account"}
               </button>
             </form>
             <div className="mt-6 text-center text-sm text-gray-600">
               Already have an account?
               <Link
                 to="/login"
-                className="text-blue-600 hover:underline cursor-pointer"
+                className="ml-1 text-blue-600 hover:underline cursor-pointer"
               >
                 Sign in
               </Link>

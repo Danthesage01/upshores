@@ -7,30 +7,35 @@ import {
 } from "../layout";
 
 import {
-  AdminDashboard,
-  CompanyDashboard,
+  CompaniesPage,
+  Dashboard,
+  ErrorPage,
   LandingPage,
   LoginPage,
+  ProfilePage,
   RegistrationPage,
+  SavedPage,
 } from "../pages";
+import { useDispatch } from "react-redux";
 
-// function AdminOnlyRoute({ children }) {
-//   const dispatch = useDispatch();
+function AdminOnlyRoute({ children }) {
+  const dispatch = useDispatch();
 
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   if (user?.user?.is_admin == 1) {
-//     return <>{children}</>;
-//   }
-//   return dispatch(logOut());
-// }
-// function UserOnlyRoute({ children }) {
-//   const dispatch = useDispatch();
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   if (user?.user?.is_admin == 0) {
-//     return <>{children}</>;
-//   }
-//   return dispatch(logOut());
-// }
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user?.user?.role == "super_admin") {
+    return <>{children}</>;
+  }
+  return dispatch(logOut());
+}
+
+function CompanyOnlyRoute({ children }) {
+  const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user?.user?.role == "company") {
+    return <>{children}</>;
+  }
+  return dispatch(logOut());
+}
 export const router = createBrowserRouter([
   {
     element: (
@@ -43,43 +48,18 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <LandingPage />,
-        errorElement: <Error />,
+        errorElement: <ErrorPage />,
       },
       {
         path: "/login",
         element: <LoginPage />,
-        errorElement: <Error />,
+        errorElement: <ErrorPage />,
       },
       {
         path: "/register",
         element: <RegistrationPage />,
-        errorElement: <Error />,
+        errorElement: <ErrorPage />,
       },
-      // {
-      //   path: "/terms-of-use",
-      //   element: <TermsOfUse />,
-      //   errorElement: <Error />,
-      // },
-      // {
-      //   path: "/privacy-policy",
-      //   element: <PrivacyPolicy />,
-      //   errorElement: <Error />,
-      // },
-      // {
-      //   path: "/confirm-email",
-      //   element: <ConfirmEmail />,
-      //   errorElement: <Error />,
-      // },
-      // {
-      //   path: "/forgot-password",
-      //   element: <ForgotPassword />,
-      //   errorElement: <Error />,
-      // },
-      // {
-      //   path: "/reset-password",
-      //   element: <ResetPassword />,
-      //   errorElement: <Error />,
-      // },
     ],
   },
 
@@ -89,24 +69,40 @@ export const router = createBrowserRouter([
         <DashboardLayout />
       </PrivateRoutes>
     ),
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
         path: "dashboard",
-        element: (
-          // <UserOnlyRoute>
-          <CompanyDashboard />
-          /* </UserOnlyRoute> */
-        ),
+        element: <Dashboard />,
+        errorElement: <ErrorPage />,
       },
       {
-        path: "admin-dashboard",
+        path: "profile",
         element: (
-          // <AdminOnlyRoute>
-          <AdminDashboard />
-          // </AdminOnlyRoute>
+          <CompanyOnlyRoute>
+            <ProfilePage />
+          </CompanyOnlyRoute>
         ),
+        errorElement: <ErrorPage />,
+      },
+      {
+        path: "saved",
+        element: (
+          <CompanyOnlyRoute>
+            <SavedPage />
+          </CompanyOnlyRoute>
+        ),
+        errorElement: <ErrorPage />,
+      },
+      {
+        path: "companies",
+        element: (
+          <AdminOnlyRoute>
+            <CompaniesPage />
+          </AdminOnlyRoute>
+        ),
+        errorElement: <ErrorPage />,
       },
     ],
   },
