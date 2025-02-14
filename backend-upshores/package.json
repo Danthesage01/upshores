@@ -5,8 +5,8 @@
   "type": "module",
   "description": "server for UpChores",
   "scripts": {
-    "start": "node app",
-    "dev": "nodemon app"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
