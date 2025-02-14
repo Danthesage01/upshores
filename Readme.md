@@ -63,13 +63,13 @@
 
 ```sh
 git clone https://github.com/your-username/upshore.git
-cd upshore
+cd upshores
 ```
 
 ### 🔹 Install Dependencies
-
+cd into respective directories and run this:
 ```sh
-npm install  # For both frontend and backend
+npm install 
 ```
 
 ### 🔹 Set Up Environment Variables
