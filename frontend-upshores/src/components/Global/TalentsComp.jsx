@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch, FaBookmark, FaLinkedin } from "react-icons/fa";
-import SmallLoader from "../Global/SmallLoader";
-import Pagination from "../Global/pagination";
+import SmallLoader from "./SmallLoader";
+import Pagination from "./pagination";
 import { formatCurrency } from "../../utils/utils";
 
 export const TalentsComp = ({
